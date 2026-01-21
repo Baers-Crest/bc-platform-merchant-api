@@ -331,6 +331,135 @@ components:
           format: uri
           type: string
       type: object
+    OpenBankingTransactionCreateData:
+      additionalProperties: false
+      properties:
+        amount:
+          description: Transaction amount in EUR
+          example: 99.99
+          format: decimal
+          minimum: 0.01
+          type: number
+        metadata:
+          description: Optional metadata (recommended JSON format)
+          type: string
+        sender:
+          $ref: "#/components/schemas/OpenBankingTransactionSender"
+          description: Sender information
+        successUrl:
+          description: Redirect URL on successful transaction
+          format: uri
+          minLength: 1
+          type: string
+      required:
+        - amount
+        - sender
+        - successUrl
+      type: object
+    OpenBankingTransactionCreatedResponse:
+      additionalProperties: false
+      properties:
+        id:
+          description: Transaction ID
+          example: obt_550e8400-e29b-41d4-a716-446655440000
+          type: string
+        url:
+          description: URL for completing the transaction
+          example: https://app.com/api/open-banking/transactions/widget/1ab
+          type: string
+      required:
+        - id
+        - url
+      type: object
+    OpenBankingTransactionListResponse:
+      additionalProperties: false
+      properties:
+        items:
+          description: Transaction list
+          items:
+            $ref: "#/components/schemas/OpenBankingTransactionResponse"
+          nullable: true
+          type: array
+        nextCursor:
+          description: Next cursor
+          type: string
+      required:
+        - items
+      type: object
+    OpenBankingTransactionResponse:
+      additionalProperties: false
+      properties:
+        amount:
+          description: Transaction amount
+          example: 99.99
+          format: decimal
+          type: number
+        createdAt:
+          description: Creation timestamp
+          example: "2023-11-21T02:00:54.465Z"
+          format: date-time
+          type: string
+        currency:
+          description: Currency code (always EUR)
+          example: EUR
+          type: string
+        iban:
+          description: IBAN if available
+          type: string
+        id:
+          description: Transaction ID
+          example: obt_550e8400-e29b-41d4-a716-446655440000
+          type: string
+        metadata:
+          description: Associated metadata
+          type: string
+        modifiedAt:
+          description: Last modification timestamp
+          example: "2023-11-21T02:00:54.465Z"
+          format: date-time
+          type: string
+        sender:
+          $ref: "#/components/schemas/OpenBankingTransactionSender"
+          description: Sender information
+        status:
+          description: Transaction status
+          enum:
+            - PENDING
+            - IN_TRANSIT
+            - COMPLETED
+            - FAILED
+            - CANCELLED
+          type: string
+        successUrl:
+          description: Success redirect URL
+          type: string
+      required:
+        - id
+        - amount
+        - currency
+        - status
+        - sender
+        - successUrl
+        - createdAt
+        - modifiedAt
+      type: object
+    OpenBankingTransactionSender:
+      additionalProperties: false
+      properties:
+        email:
+          description: Sender email address
+          example: joe.doe@gmail.com
+          format: email
+          type: string
+        name:
+          description: Sender full name
+          example: Joe Doe
+          minLength: 1
+          type: string
+      required:
+        - email
+        - name
+      type: object
     PaymentCard:
       additionalProperties: false
       properties:
@@ -832,6 +961,100 @@ paths:
       summary: Get customer blocklist entry
       tags:
         - Customer Blocklist
+  /api/open-banking/transactions:
+    get:
+      description: Lists open banking transactions with pagination
+      operationId: list-open-banking-transactions
+      parameters:
+        - description: Cursor for pagination
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: Cursor for pagination
+            type: string
+        - description: Maximum number of items to return
+          example: 20
+          explode: false
+          in: query
+          name: limit
+          schema:
+            description: Maximum number of items to return
+            example: 20
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenBankingTransactionListResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: List open banking transactions
+      tags:
+        - Open Banking
+    post:
+      description: Creates a new open banking transaction
+      operationId: create-open-banking-transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenBankingTransactionCreateData"
+              description: Open banking transaction creation data
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenBankingTransactionCreatedResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Create open banking transaction
+      tags:
+        - Open Banking
+  /api/open-banking/transactions/{openBankingTransactionId}:
+    get:
+      description: Retrieves an open banking transaction by ID
+      operationId: get-open-banking-transaction
+      parameters:
+        - description: open banking transaction ID
+          in: path
+          name: openBankingTransactionId
+          required: true
+          schema:
+            description: open banking transaction ID
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenBankingTransactionResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get open banking transaction
+      tags:
+        - Open Banking
   /api/payment:
     get:
       description: Lists existing payments with pagination
