@@ -569,6 +569,12 @@ components:
             - PARTIALLY_REFUNDED
             - DISPUTE_WON
             - CHARGEBACK
+            - PAYMENT_REQUESTED
+            - PENDING_APPROVAL
+            - REFUND_APPROVED
+            - REFUND_REJECTED
+            - REFUND_FAILED
+            - REFUND_COMPLETED
           example: AUTH_REQUESTED
           type: string
       required:
@@ -677,6 +683,12 @@ components:
             - PARTIALLY_REFUNDED
             - DISPUTE_WON
             - CHARGEBACK
+            - PAYMENT_REQUESTED
+            - PENDING_APPROVAL
+            - REFUND_APPROVED
+            - REFUND_REJECTED
+            - REFUND_FAILED
+            - REFUND_COMPLETED
           type: string
         type:
           description: Transaction type
