@@ -564,6 +564,7 @@ components:
             - KYC_REQUESTED
             - CAPTURED
             - DECLINED
+            - FAILED
             - TRANSFERRED
             - REFUNDED
             - PARTIALLY_REFUNDED
@@ -678,6 +679,7 @@ components:
             - KYC_REQUESTED
             - CAPTURED
             - DECLINED
+            - FAILED
             - TRANSFERRED
             - REFUNDED
             - PARTIALLY_REFUNDED
