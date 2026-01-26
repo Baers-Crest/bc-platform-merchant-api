@@ -1,5 +1,29 @@
 components:
   schemas:
+    BatchPaymentCreateData:
+      additionalProperties: false
+      properties:
+        payments:
+          description: "Payments to create (max size is configurable, default: 100)"
+          items:
+            $ref: "#/components/schemas/PaymentCreateData"
+          minItems: 1
+          nullable: true
+          type: array
+      required:
+        - payments
+      type: object
+    BatchPaymentCreatedResponse:
+      additionalProperties: false
+      properties:
+        payments:
+          description: Created payments, use externalId field to correlate with request items
+          items:
+            $ref: "#/components/schemas/PaymentCreatedResponse"
+          type: array
+      required:
+        - payments
+      type: object
     BillingAddress:
       additionalProperties: false
       properties:
@@ -522,7 +546,9 @@ components:
           type: string
         externalId:
           description: External reference ID
+          maxLength: 255
           minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
           type: string
         failureUrl:
           description: Redirect URL on failed payment
@@ -545,6 +571,9 @@ components:
     PaymentCreatedResponse:
       additionalProperties: false
       properties:
+        externalId:
+          description: External ID provided by merchant
+          type: string
         id:
           description: Payment ID
           example: pay_550e8400-e29b-41d4-a716-446655440000
@@ -580,6 +609,7 @@ components:
           type: string
       required:
         - id
+        - externalId
         - status
       type: object
     PaymentCustomer:
@@ -660,6 +690,9 @@ components:
         customer:
           $ref: "#/components/schemas/CustomerResponse"
           description: Customer information
+        externalId:
+          description: External ID provided by merchant
+          type: string
         id:
           description: Payment ID
           example: pay_550e8400-e29b-41d4-a716-446655440000
@@ -706,6 +739,7 @@ components:
           type: string
       required:
         - id
+        - externalId
         - type
         - card
         - currency
@@ -726,7 +760,9 @@ components:
           type: number
         externalId:
           description: External reference ID
+          maxLength: 255
           minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
           type: string
       required:
         - externalId
@@ -1129,6 +1165,31 @@ paths:
         "422":
           description: Payment declined
       summary: Create payment
+      tags:
+        - Payment
+  /api/payment/batch:
+    post:
+      description: Creates multiple payments atomically. All payments succeed or none are created. Maximum 100 payments per batch.
+      operationId: create-payment-batch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchPaymentCreateData"
+              description: Batch payment creation data
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchPaymentCreatedResponse"
+          description: All payments created successfully
+        "400":
+          description: "Invalid request: batch size exceeded, duplicate externalId in batch, or validation error"
+        "409":
+          description: Duplicate externalId conflicts with existing payment
+      summary: Create payments batch
       tags:
         - Payment
   /api/payment/{id}:
