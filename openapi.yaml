@@ -1,3 +1,628 @@
+openapi: 3.0.3
+info:
+  title: BC Platform Merchants API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/blocklist/customers:
+    get:
+      description: Lists blocked customers with pagination
+      operationId: list-customer-blocklist
+      parameters:
+        - description: Cursor for pagination
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: Cursor for pagination
+            type: string
+        - description: Maximum number of items to return
+          example: 20
+          explode: false
+          in: query
+          name: limit
+          schema:
+            description: Maximum number of items to return
+            example: 20
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerBlocklistListResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: List customer blocklist entries
+      tags:
+        - Customer Blocklist
+    post:
+      description: Blocks multiple customers by card (BIN + last 4 digits) or email
+      operationId: create-customer-blocklist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerBlocklistCreateData"
+              description: Customer blocklist creation data
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerBlocklistCreateResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Create customer blocklist entries
+      tags:
+        - Customer Blocklist
+  /api/blocklist/customers/{id}:
+    get:
+      description: Retrieves an existing blocked customer by ID
+      operationId: get-customer-blocklist
+      parameters:
+        - description: customer blocklist ID
+          in: path
+          name: id
+          required: true
+          schema:
+            description: customer blocklist ID
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerBlocklistResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get customer blocklist entry
+      tags:
+        - Customer Blocklist
+  /api/open-banking/transactions:
+    get:
+      description: Lists open banking transactions with pagination
+      operationId: list-open-banking-transactions
+      parameters:
+        - description: Cursor for pagination
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: Cursor for pagination
+            type: string
+        - description: Maximum number of items to return
+          example: 20
+          explode: false
+          in: query
+          name: limit
+          schema:
+            description: Maximum number of items to return
+            example: 20
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenBankingTransactionListResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: List open banking transactions
+      tags:
+        - Open Banking
+    post:
+      description: Creates a new open banking transaction
+      operationId: create-open-banking-transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OpenBankingTransactionCreateData"
+              description: Open banking transaction creation data
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenBankingTransactionCreatedResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Create open banking transaction
+      tags:
+        - Open Banking
+  /api/open-banking/transactions/{openBankingTransactionId}:
+    get:
+      description: Retrieves an open banking transaction by ID
+      operationId: get-open-banking-transaction
+      parameters:
+        - description: open banking transaction ID
+          in: path
+          name: openBankingTransactionId
+          required: true
+          schema:
+            description: open banking transaction ID
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenBankingTransactionResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get open banking transaction
+      tags:
+        - Open Banking
+  /api/payment:
+    get:
+      description: Lists existing payments with pagination
+      operationId: list-payments
+      parameters:
+        - description: Cursor for pagination
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: Cursor for pagination
+            type: string
+        - description: Maximum number of items to return
+          example: 20
+          explode: false
+          in: query
+          name: limit
+          schema:
+            description: Maximum number of items to return
+            example: 20
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentListResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: List payments
+      tags:
+        - Payment
+    post:
+      description: Requests a new payment
+      operationId: create-payment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentCreateData"
+              description: Payment creation data
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentCreatedResponse"
+          description: OK
+        "422":
+          description: Payment declined
+      summary: Create payment
+      tags:
+        - Payment
+  /api/payment/batch:
+    post:
+      description: Creates multiple payments atomically. All payments succeed or none are created. Maximum 100 payments per batch.
+      operationId: create-payment-batch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchPaymentCreateData"
+              description: Batch payment creation data
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchPaymentCreatedResponse"
+          description: All payments created successfully
+        "400":
+          description: "Invalid request: batch size exceeded, duplicate externalId in batch, or validation error"
+        "409":
+          description: Duplicate externalId conflicts with existing payment
+      summary: Create payments batch
+      tags:
+        - Payment
+  /api/payment/ptc:
+    post:
+      description: Requests a new push-to-card payment
+      operationId: create-payment-ptc
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentPtcCreateData"
+              description: Push-to-card payment creation data
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentPtcCreatedResponse"
+          description: OK
+        "422":
+          description: Push-to-card payment declined
+      summary: Create push-to-card payment
+      tags:
+        - Payment
+  /api/payment/{id}:
+    get:
+      description: Retrieves an existing payment by ID
+      operationId: get-payment
+      parameters:
+        - description: payment ID
+          in: path
+          name: id
+          required: true
+          schema:
+            description: payment ID
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentPayloadResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get payment
+      tags:
+        - Payment
+  /api/payment/{id}/confirm:
+    post:
+      description: Confirms an existing payment by ID
+      operationId: confirm-payment
+      parameters:
+        - description: payment ID
+          in: path
+          name: id
+          required: true
+          schema:
+            description: payment ID
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentConfirmedResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Confirm payment
+      tags:
+        - Payment
+  /api/payment/{id}/refund:
+    post:
+      description: Request payment refund
+      operationId: create-refund
+      parameters:
+        - description: payment ID
+          in: path
+          name: id
+          required: true
+          schema:
+            description: payment ID
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefundCreateData"
+              description: Refund creation data
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefundCreatedResponse"
+          description: OK
+        "201":
+          description: Refund request submitted
+        "422":
+          description: Request unprocessable
+      summary: Create refund
+      tags:
+        - Payment
+  /api/webhooks:
+    get:
+      description: Returns all webhooks for the authenticated merchant
+      operationId: get-webhooks
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webhooks"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: List webhooks
+      tags:
+        - Webhooks
+    post:
+      description: Creates a new webhook for the authenticated merchant - only one webhook per event type is allowed per merchant
+      operationId: create-webhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookCreateData"
+              description: Webhook creation data
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webhook"
+          description: Created
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Create webhook
+      tags:
+        - Webhooks
+  /api/webhooks/{webhookId}:
+    delete:
+      description: Deletes a webhook for the authenticated merchant
+      operationId: delete-webhook
+      parameters:
+        - description: Webhook ID
+          example: whk_01234567-0000-0000-0000-000000000000
+          in: path
+          name: webhookId
+          required: true
+          schema:
+            description: Webhook ID
+            example: whk_01234567-0000-0000-0000-000000000000
+            type: string
+      responses:
+        "204":
+          description: No Content
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Delete webhook
+      tags:
+        - Webhooks
+    get:
+      description: Returns a specific webhook by ID for the authenticated merchant
+      operationId: get-webhook
+      parameters:
+        - description: Webhook ID
+          example: whk_01234567-0000-0000-0000-000000000000
+          in: path
+          name: webhookId
+          required: true
+          schema:
+            description: Webhook ID
+            example: whk_01234567-0000-0000-0000-000000000000
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webhook"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get webhook
+      tags:
+        - Webhooks
+    patch:
+      description: Partially updates a webhook for the authenticated merchant - only provided fields will be updated
+      operationId: update-webhook
+      parameters:
+        - description: Webhook ID
+          example: whk_01234567-0000-0000-0000-000000000000
+          in: path
+          name: webhookId
+          required: true
+          schema:
+            description: Webhook ID
+            example: whk_01234567-0000-0000-0000-000000000000
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookUpdateData"
+              description: Webhook update data
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Webhook"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Update webhook
+      tags:
+        - Webhooks
+  /api/whitelist/card:
+    get:
+      description: Lists whitelisted cards with pagination
+      operationId: list-card-whitelist
+      parameters:
+        - description: Cursor for pagination
+          explode: false
+          in: query
+          name: cursor
+          schema:
+            description: Cursor for pagination
+            type: string
+        - description: Maximum number of items to return
+          example: 20
+          explode: false
+          in: query
+          name: limit
+          schema:
+            description: Maximum number of items to return
+            example: 20
+            format: int64
+            maximum: 100
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardWhitelistListResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: List card whitelist entries
+      tags:
+        - Card Whitelist
+    post:
+      description: Whitelists multiple cards by BIN code and last 4 digits
+      operationId: create-card-whitelist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardWhitelistCreateData"
+              description: Card whitelist creation data
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardWhitelistCreateResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Create card whitelist entries
+      tags:
+        - Card Whitelist
+  /api/whitelist/card/{id}:
+    get:
+      description: Retrieves an existing whitelisted card by ID
+      operationId: get-card-whitelist
+      parameters:
+        - description: card whitelist ID
+          in: path
+          name: id
+          required: true
+          schema:
+            description: card whitelist ID
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardWhitelistResponse"
+          description: OK
+        default:
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ErrorModel"
+          description: Error
+      summary: Get card whitelist entry
+      tags:
+        - Card Whitelist
 components:
   schemas:
     BatchPaymentCreateData:
@@ -972,628 +1597,3 @@ components:
             $ref: "#/components/schemas/Webhook"
           type: array
       type: object
-info:
-  title: BC Platform Merchants API
-  version: 1.0.0
-openapi: 3.0.3
-paths:
-  /api/blocklist/customers:
-    get:
-      description: Lists blocked customers with pagination
-      operationId: list-customer-blocklist
-      parameters:
-        - description: Cursor for pagination
-          explode: false
-          in: query
-          name: cursor
-          schema:
-            description: Cursor for pagination
-            type: string
-        - description: Maximum number of items to return
-          example: 20
-          explode: false
-          in: query
-          name: limit
-          schema:
-            description: Maximum number of items to return
-            example: 20
-            format: int64
-            maximum: 100
-            minimum: 1
-            type: integer
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CustomerBlocklistListResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: List customer blocklist entries
-      tags:
-        - Customer Blocklist
-    post:
-      description: Blocks multiple customers by card (BIN + last 4 digits) or email
-      operationId: create-customer-blocklist
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CustomerBlocklistCreateData"
-              description: Customer blocklist creation data
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CustomerBlocklistCreateResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Create customer blocklist entries
-      tags:
-        - Customer Blocklist
-  /api/blocklist/customers/{id}:
-    get:
-      description: Retrieves an existing blocked customer by ID
-      operationId: get-customer-blocklist
-      parameters:
-        - description: customer blocklist ID
-          in: path
-          name: id
-          required: true
-          schema:
-            description: customer blocklist ID
-            type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CustomerBlocklistResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Get customer blocklist entry
-      tags:
-        - Customer Blocklist
-  /api/open-banking/transactions:
-    get:
-      description: Lists open banking transactions with pagination
-      operationId: list-open-banking-transactions
-      parameters:
-        - description: Cursor for pagination
-          explode: false
-          in: query
-          name: cursor
-          schema:
-            description: Cursor for pagination
-            type: string
-        - description: Maximum number of items to return
-          example: 20
-          explode: false
-          in: query
-          name: limit
-          schema:
-            description: Maximum number of items to return
-            example: 20
-            format: int64
-            maximum: 100
-            minimum: 1
-            type: integer
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/OpenBankingTransactionListResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: List open banking transactions
-      tags:
-        - Open Banking
-    post:
-      description: Creates a new open banking transaction
-      operationId: create-open-banking-transaction
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/OpenBankingTransactionCreateData"
-              description: Open banking transaction creation data
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/OpenBankingTransactionCreatedResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Create open banking transaction
-      tags:
-        - Open Banking
-  /api/open-banking/transactions/{openBankingTransactionId}:
-    get:
-      description: Retrieves an open banking transaction by ID
-      operationId: get-open-banking-transaction
-      parameters:
-        - description: open banking transaction ID
-          in: path
-          name: openBankingTransactionId
-          required: true
-          schema:
-            description: open banking transaction ID
-            type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/OpenBankingTransactionResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Get open banking transaction
-      tags:
-        - Open Banking
-  /api/payment:
-    get:
-      description: Lists existing payments with pagination
-      operationId: list-payments
-      parameters:
-        - description: Cursor for pagination
-          explode: false
-          in: query
-          name: cursor
-          schema:
-            description: Cursor for pagination
-            type: string
-        - description: Maximum number of items to return
-          example: 20
-          explode: false
-          in: query
-          name: limit
-          schema:
-            description: Maximum number of items to return
-            example: 20
-            format: int64
-            maximum: 100
-            minimum: 1
-            type: integer
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentListResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: List payments
-      tags:
-        - Payment
-    post:
-      description: Requests a new payment
-      operationId: create-payment
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PaymentCreateData"
-              description: Payment creation data
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentCreatedResponse"
-          description: OK
-        "422":
-          description: Payment declined
-      summary: Create payment
-      tags:
-        - Payment
-  /api/payment/batch:
-    post:
-      description: Creates multiple payments atomically. All payments succeed or none are created. Maximum 100 payments per batch.
-      operationId: create-payment-batch
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/BatchPaymentCreateData"
-              description: Batch payment creation data
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BatchPaymentCreatedResponse"
-          description: All payments created successfully
-        "400":
-          description: "Invalid request: batch size exceeded, duplicate externalId in batch, or validation error"
-        "409":
-          description: Duplicate externalId conflicts with existing payment
-      summary: Create payments batch
-      tags:
-        - Payment
-  /api/payment/ptc:
-    post:
-      description: Requests a new push-to-card payment
-      operationId: create-payment-ptc
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/PaymentPtcCreateData"
-              description: Push-to-card payment creation data
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentPtcCreatedResponse"
-          description: OK
-        "422":
-          description: Push-to-card payment declined
-      summary: Create push-to-card payment
-      tags:
-        - Payment
-  /api/payment/{id}:
-    get:
-      description: Retrieves an existing payment by ID
-      operationId: get-payment
-      parameters:
-        - description: payment ID
-          in: path
-          name: id
-          required: true
-          schema:
-            description: payment ID
-            type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentPayloadResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Get payment
-      tags:
-        - Payment
-  /api/payment/{id}/confirm:
-    post:
-      description: Confirms an existing payment by ID
-      operationId: confirm-payment
-      parameters:
-        - description: payment ID
-          in: path
-          name: id
-          required: true
-          schema:
-            description: payment ID
-            type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PaymentConfirmedResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Confirm payment
-      tags:
-        - Payment
-  /api/payment/{id}/refund:
-    post:
-      description: Request payment refund
-      operationId: create-refund
-      parameters:
-        - description: payment ID
-          in: path
-          name: id
-          required: true
-          schema:
-            description: payment ID
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RefundCreateData"
-              description: Refund creation data
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RefundCreatedResponse"
-          description: OK
-        "201":
-          description: Refund request submitted
-        "422":
-          description: Request unprocessable
-      summary: Create refund
-      tags:
-        - Payment
-  /api/webhooks:
-    get:
-      description: Returns all webhooks for the authenticated merchant
-      operationId: get-webhooks
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Webhooks"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: List webhooks
-      tags:
-        - Webhooks
-    post:
-      description: Creates a new webhook for the authenticated merchant - only one webhook per event type is allowed per merchant
-      operationId: create-webhook
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/WebhookCreateData"
-              description: Webhook creation data
-        required: true
-      responses:
-        "201":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Webhook"
-          description: Created
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Create webhook
-      tags:
-        - Webhooks
-  /api/webhooks/{webhookId}:
-    delete:
-      description: Deletes a webhook for the authenticated merchant
-      operationId: delete-webhook
-      parameters:
-        - description: Webhook ID
-          example: whk_01234567-0000-0000-0000-000000000000
-          in: path
-          name: webhookId
-          required: true
-          schema:
-            description: Webhook ID
-            example: whk_01234567-0000-0000-0000-000000000000
-            type: string
-      responses:
-        "204":
-          description: No Content
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Delete webhook
-      tags:
-        - Webhooks
-    get:
-      description: Returns a specific webhook by ID for the authenticated merchant
-      operationId: get-webhook
-      parameters:
-        - description: Webhook ID
-          example: whk_01234567-0000-0000-0000-000000000000
-          in: path
-          name: webhookId
-          required: true
-          schema:
-            description: Webhook ID
-            example: whk_01234567-0000-0000-0000-000000000000
-            type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Webhook"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Get webhook
-      tags:
-        - Webhooks
-    patch:
-      description: Partially updates a webhook for the authenticated merchant - only provided fields will be updated
-      operationId: update-webhook
-      parameters:
-        - description: Webhook ID
-          example: whk_01234567-0000-0000-0000-000000000000
-          in: path
-          name: webhookId
-          required: true
-          schema:
-            description: Webhook ID
-            example: whk_01234567-0000-0000-0000-000000000000
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/WebhookUpdateData"
-              description: Webhook update data
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Webhook"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Update webhook
-      tags:
-        - Webhooks
-  /api/whitelist/card:
-    get:
-      description: Lists whitelisted cards with pagination
-      operationId: list-card-whitelist
-      parameters:
-        - description: Cursor for pagination
-          explode: false
-          in: query
-          name: cursor
-          schema:
-            description: Cursor for pagination
-            type: string
-        - description: Maximum number of items to return
-          example: 20
-          explode: false
-          in: query
-          name: limit
-          schema:
-            description: Maximum number of items to return
-            example: 20
-            format: int64
-            maximum: 100
-            minimum: 1
-            type: integer
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CardWhitelistListResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: List card whitelist entries
-      tags:
-        - Card Whitelist
-    post:
-      description: Whitelists multiple cards by BIN code and last 4 digits
-      operationId: create-card-whitelist
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CardWhitelistCreateData"
-              description: Card whitelist creation data
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CardWhitelistCreateResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Create card whitelist entries
-      tags:
-        - Card Whitelist
-  /api/whitelist/card/{id}:
-    get:
-      description: Retrieves an existing whitelisted card by ID
-      operationId: get-card-whitelist
-      parameters:
-        - description: card whitelist ID
-          in: path
-          name: id
-          required: true
-          schema:
-            description: card whitelist ID
-            type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CardWhitelistResponse"
-          description: OK
-        default:
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ErrorModel"
-          description: Error
-      summary: Get card whitelist entry
-      tags:
-        - Card Whitelist
-servers:
-  - url: http://localhost:8080
