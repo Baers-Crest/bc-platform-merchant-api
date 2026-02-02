@@ -981,6 +981,11 @@ components:
           format: decimal
           minimum: 0.01
           type: number
+        externalId:
+          description: Merchant-provided external identifier for the transaction
+          example: order-12345
+          minLength: 1
+          type: string
         metadata:
           description: Optional metadata (recommended JSON format)
           type: string
@@ -993,6 +998,7 @@ components:
           minLength: 1
           type: string
       required:
+        - externalId
         - amount
         - sender
         - successUrl
@@ -1000,9 +1006,22 @@ components:
     OpenBankingTransactionCreatedResponse:
       additionalProperties: false
       properties:
+        externalId:
+          description: Merchant-provided external identifier
+          example: order-12345
+          type: string
         id:
           description: Transaction ID
           example: obt_550e8400-e29b-41d4-a716-446655440000
+          type: string
+        status:
+          description: Transaction status
+          enum:
+            - PENDING
+            - IN_TRANSIT
+            - COMPLETED
+            - FAILED
+            - CANCELLED
           type: string
         url:
           description: URL for completing the transaction
@@ -1010,7 +1029,8 @@ components:
           type: string
       required:
         - id
-        - url
+        - externalId
+        - status
       type: object
     OpenBankingTransactionListResponse:
       additionalProperties: false
