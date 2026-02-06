@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: BC Platform Merchants API
+  title: Platform Merchants API
   version: 1.0.0
 servers:
   - url: http://localhost:8080
@@ -1374,6 +1374,9 @@ components:
           example: "2023-11-21T02:00:54.465Z"
           format: date-time
           type: string
+        useRefunds:
+          description: Whether to fulfill the amount by first refunding captured payments (starting with the oldest within last 180 days) and then pushing any remaining amount to the card
+          type: boolean
       required:
         - id
         - externalId
@@ -1412,10 +1415,14 @@ components:
         metadata:
           description: Metadata
           type: string
+        useRefunds:
+          description: Whether to fulfill the amount by first refunding captured payments (starting with the oldest within last 180 days) and then pushing any remaining amount to the card
+          type: boolean
       required:
         - card
         - currency
         - amount
+        - useRefunds
         - externalId
       type: object
     PaymentPtcCreatedResponse:
